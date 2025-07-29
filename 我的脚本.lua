@@ -1,9 +1,14 @@
+--玄影散人--
 local TextButtons = nil
 local buttons = {}
+local list2 = {
+{Text = "功能1", Switch = true},
+{Text = "功能2", Switch = true}
+}
 local list = {"主要功能", "功能2", "功能3"}
 local Yoffset = 0
 local player = game.Players.LocalPlayer
-local Gui = player.PlayerGui
+local Gui = game.CoreGui
 local dragToggle = nil
 local dragSpeed = 0.1
 local dragStart = nil
@@ -14,7 +19,7 @@ local UIS = game:GetService('UserInputService')
 --运行script提示
 game:GetService("StarterGui"):SetCore("SendNotification", {
 Title = "脚本运行成功",
-Text = "作者:金光GoldLight",
+Text = "作者:玄影散人",
 Duration = 3
 })
 game:GetService("StarterGui"):SetCore("SendNotification", {
@@ -25,6 +30,7 @@ Duration = 4
 --创建ScreenGui
 local Sgui = Instance.new("ScreenGui")
 Sgui.Parent = Gui
+Sgui.Name = " DaoGui"
  
 --创建按钮
 local Button = Instance.new("ImageButton")
@@ -45,7 +51,7 @@ Buttonstroke.Thickness = 2
 --创建主背景
 local Maingui = Instance.new("Frame")
 Maingui.Parent = Sgui
-Maingui.Position = UDim2.new(0.5,-200,0.5,-125)
+Maingui.Position = UDim2.new(0.5,-175,0.5,-140)
 Maingui.Size = UDim2.new(0,350,0,262)
 Maingui.BackgroundColor3 = Color3.fromRGB(30,30,30)
 Maingui.BackgroundTransparency = 0.05
@@ -145,9 +151,8 @@ function brox(name)
     ScrollingFrame.ScrollBarThickness = 0
     return {TextButton, ScrollingFrame}
 end
-function functionui(text)
+function functionui(Text, Switch)
 local Frame = Instance.new("Frame")
-Frame.Position = UDim2.new(0.02,0,0,4)
 Frame.Size = UDim2.new(0.96,0,0,30)
 Frame.Parent = buttons[1][2]
 Frame.BackgroundTransparency = 0.1
@@ -162,12 +167,42 @@ Framecorner.Parent = Frame
 Framecorner.CornerRadius = UDim.new(0,4)
 local FrameText = Instance.new("TextLabel")
 FrameText.Parent = Frame
-FrameText.Text = "开挂/作弊功能text"
+FrameText.Text = Text
 FrameText.Position = UDim2.new(0.05,0,0,0)
-FrameText.Size = UDim2.new(0.7,0,1,0)
+FrameText.Size = UDim2.new(0.725,0,1,0)
 FrameText.TextColor3 = Color3.fromRGB(255,255,255)
-FrameText.FontSize = "Size10"
+FrameText.TextSize = 19
+FrameText.Font = "Code"
 FrameText.BackgroundTransparency = 1
+local SwitchState = false
+if Switch then
+local SImageButton = Instance.new("ImageButton")
+SImageButton.Parent = FrameText
+SImageButton.Position = UDim2.new(1,0,0.14,0)
+SImageButton.Size = UDim2.new(0,45,0,21)
+SImageButton.BackgroundColor3 = Color3.fromRGB(190,190,190)
+local ImageUICorner = Instance.new("UICorner")
+ImageUICorner.Parent = SImageButton
+ImageUICorner.CornerRadius = UDim.new(0,15)
+local SFrame = Instance.new("Frame")
+SFrame.Parent = SImageButton
+SFrame.Size = UDim2.new(0,14,0,14)
+SFrame.Position = UDim2.new(0.11,0,0.16,0)
+SFrame.BackgroundColor3 = Color3.fromRGB(255,255,255)
+local SFrameUICorner = Instance.new("UICorner")
+SFrameUICorner.Parent = SFrame
+SImageButton.MouseButton1Click:Connect(function()
+SwitchState = not SwitchState
+if SwitchState then
+SFrame.Position = UDim2.new(0.58,0,0.16,0)
+SImageButton.BackgroundColor3 = Color3.fromRGB(50,255,50)
+else
+SFrame.Position = UDim2.new(0.11,0,0.16,0)
+SImageButton.BackgroundColor3 = Color3.fromRGB(190,190,190)
+end
+end)
+end
+return Frame
 end
 function broy()
     for _, lists in ipairs(list) do
@@ -190,6 +225,16 @@ function broy()
     end
 end 
 broy()
+function brobro()
+    local Yoffset2 = 4 -- 初始化偏移量
+    for _, v in ipairs(list2) do
+        local Frame = functionui(v.Text, v.Switch)
+        Frame.Parent = buttons[1][2] -- 确保Frame被添加到正确的父级
+        Frame.Position = UDim2.new(0.02, 0, 0, Yoffset2) -- 动态设置Y位置
+        Yoffset2 = Yoffset2 + Frame.AbsoluteSize.Y + 35 -- 更新偏移量
+    end
+end
+brobro()
 buttons[1][1].BackgroundTransparency = 0.8 -- 设置透明度以显示选中状态
 buttons[1][2].Visible = true -- 显示对应的滚动框
 -- 保存当前的选中状态到 TextButtons
@@ -258,4 +303,3 @@ local ha = buttons[3]
 ha[1].MouseButton1Click:Connect(function()
     print("yes！yes? yes!")
 end)
-functionui()
