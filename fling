@@ -1,0 +1,131 @@
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local LocalPlayer = Players.LocalPlayer
+
+local SlapEvent = ReplicatedStorage:WaitForChild("ITS")
+_G.go = false
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+local Frame = Instance.new("Frame")
+Frame.Size = UDim2.new(0, 250, 0, 180)
+Frame.Position = UDim2.new(0.5, -125, 0.5, -90)
+Frame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+Frame.Active = true
+Frame.Draggable = true
+Frame.Parent = ScreenGui
+
+local Title = Instance.new("TextLabel")
+Title.Text = "拍飞控制器"
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+Title.TextColor3 = Color3.new(1, 1, 1)
+Title.Parent = Frame
+
+local ToggleButton = Instance.new("TextButton")
+ToggleButton.Text = "开启全体拍飞"
+ToggleButton.Size = UDim2.new(0.8, 0, 0, 30)
+ToggleButton.Position = UDim2.new(0.1, 0, 0.3, 0)
+ToggleButton.Parent = Frame
+
+local NameInput = Instance.new("TextBox")
+NameInput.PlaceholderText = "输入玩家名(任意分隔符)"
+NameInput.Size = UDim2.new(0.8, 0, 0, 30)
+NameInput.Position = UDim2.new(0.1, 0, 0.6, 0)
+NameInput.Parent = Frame
+
+local SlapSingleButton = Instance.new("TextButton")
+SlapSingleButton.Text = "拍飞指定玩家"
+SlapSingleButton.Size = UDim2.new(0.8, 0, 0, 30)
+SlapSingleButton.Position = UDim2.new(0.1, 0, 0.8, 0)
+SlapSingleButton.Parent = Frame
+
+local lastActivationTime = 0
+
+local function EnsureActivation()
+    if os.clock() - lastActivationTime > 5 then
+        if LocalPlayer.Character then
+            SlapEvent:FireServer("slash", LocalPlayer.Character, Vector3.new(0,0,0))
+        end
+        lastActivationTime = os.clock()
+    end
+end
+
+local function SlapPlayer(player)
+    EnsureActivation()
+    
+    if player and player.Character and player.Character:FindFirstChild("Humanoid") then
+        local force = Vector3.new(
+            math.random(-20, 20),
+            10,
+            math.random(-20, 20)
+        )
+        SlapEvent:FireServer("slash", player.Character, force)
+    end
+end
+
+local function SlapAll()
+    EnsureActivation()
+    
+    while _G.go do
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer then
+                SlapPlayer(player)
+            end
+        end
+        task.wait(0.1)
+    end
+end
+
+local function FindPlayersByNamePattern(input)
+    local targets = {}
+    if #input == 0 then return targets end
+    
+    for _, player in ipairs(Players:GetPlayers()) do
+        for word in string.gmatch(input, "[^%s,;|]+") do
+            if string.find(player.Name:lower(), word:lower(), 1, true) then
+                table.insert(targets, player)
+                break
+            end
+        end
+    end
+    return targets
+end
+
+local function InitializeSlap()
+    for i = 1, 3 do
+        if LocalPlayer.Character then
+            SlapEvent:FireServer("slash", LocalPlayer.Character, Vector3.new(0,0,0))
+            lastActivationTime = os.clock()
+            break
+        end
+        task.wait(0.5)
+    end
+end
+
+task.spawn(function()
+    LocalPlayer.CharacterAdded:Wait()
+    task.wait(1)
+    InitializeSlap()
+end)
+
+InitializeSlap()
+
+ToggleButton.MouseButton1Click:Connect(function()
+    _G.go = not _G.go
+    if _G.go then
+        ToggleButton.Text = "关闭全体拍飞"
+        coroutine.wrap(SlapAll)()
+    else
+        ToggleButton.Text = "开启全体拍飞"
+    end
+end)
+
+SlapSingleButton.MouseButton1Click:Connect(function()
+    local targets = FindPlayersByNamePattern(NameInput.Text)
+    for _, target in ipairs(targets) do
+        SlapPlayer(target)
+    end
+end)
